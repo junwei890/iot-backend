@@ -59,7 +59,7 @@ func main() {
 		WriteTimeout:      5 * time.Second,
 		MaxHeaderBytes:    8192,
 	}
-	log.Println("started server on port :8080")
+	log.Printf("started server on port %s", port)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(fmt.Errorf("couldn't start server: %v", err))
 	}
