@@ -47,16 +47,15 @@ func main() {
 	mux.HandleFunc("POST /data", shared.postData)
 	mux.HandleFunc("GET /data", shared.getData)
 
-	port := os.Getenv("PORT")
 	server := http.Server{
-		Addr:              port,
+		Addr:              ":8080",
 		Handler:           mux,
 		ReadTimeout:       5 * time.Second,
 		ReadHeaderTimeout: 5 * time.Second,
 		WriteTimeout:      5 * time.Second,
 		MaxHeaderBytes:    8192,
 	}
-	log.Printf("started server on port %s", port)
+	log.Println("started server on port :8080")
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(fmt.Errorf("couldn't start server: %v", err))
 	}
