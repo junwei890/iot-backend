@@ -47,8 +47,12 @@ func main() {
 	mux.HandleFunc("POST /data", shared.postData)
 	mux.HandleFunc("GET /data", shared.getData)
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	server := http.Server{
-		Addr:              ":8080",
+		Addr:              fmt.Sprintf("0.0.0.0:%s", port),
 		Handler:           mux,
 		ReadTimeout:       5 * time.Second,
 		ReadHeaderTimeout: 5 * time.Second,
