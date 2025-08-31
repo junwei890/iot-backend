@@ -43,7 +43,7 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", shared.healthz)
+	mux.HandleFunc("GET /health", shared.healthz)
 	mux.HandleFunc("POST /data", shared.postData)
 	mux.HandleFunc("GET /data", shared.getData)
 
