@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
@@ -8,8 +8,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/InfluxCommunity/influxdb3-go/influxdb3"
 	"github.com/apache/arrow/go/v15/arrow"
 )
+
+type Shared struct {
+	DBClient *influxdb3.Client
+}
 
 const errorHeaderKey = "Content-Type"
 const errorHeaderValue = "application/json"
@@ -20,7 +25,7 @@ type errorResponse struct {
 
 // #nosec G104
 // Helper function to handle responses when handlers error
-func errorWriter(w http.ResponseWriter, code int, error error) {
+func ErrorWriter(w http.ResponseWriter, code int, error error) {
 	log.Println(error)
 
 	w.Header().Set(errorHeaderKey, errorHeaderValue)
@@ -33,29 +38,6 @@ func errorWriter(w http.ResponseWriter, code int, error error) {
 	w.Write(respInBytes)
 }
 
-const healthHeaderKey = "Content-Type"
-const healthHeaderValue = "text/html"
-const healthResponse = `
-<html>
-	<head>
-		<title>Health Check</title>
-	</head>
-	<body>
-		<h1>Server ready for requests</h1>
-	</body>
-</html>
-`
-
-// Server health check
-func (s *shared) healthz(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set(healthHeaderKey, healthHeaderValue)
-	w.WriteHeader(http.StatusOK)
-
-	if _, err := w.Write([]byte(healthResponse)); err != nil {
-		errorWriter(w, http.StatusInternalServerError, fmt.Errorf("healthz: couldn't write response body: %v", err))
-	}
-}
-
 type stmReadings struct {
 	Measurement string    `json:"measurement" lp:"measurement"`
 	Location    string    `json:"location" lp:"tag,location"`
@@ -66,20 +48,20 @@ type stmReadings struct {
 }
 
 // Receiving data from the STM and storing it
-func (s *shared) postData(w http.ResponseWriter, r *http.Request) {
+func (s *Shared) PostData(w http.ResponseWriter, r *http.Request) {
 	readingsInBytes, err := io.ReadAll(r.Body)
 	if err != nil {
-		errorWriter(w, http.StatusInternalServerError, fmt.Errorf("postData: couldn't read request: %v", err))
+		ErrorWriter(w, http.StatusInternalServerError, fmt.Errorf("%s %s: couldn't read request: %v", r.Method, r.URL.Path, err))
 		return
 	}
 	readings := &stmReadings{}
 	if err := json.Unmarshal(readingsInBytes, readings); err != nil {
-		errorWriter(w, http.StatusBadRequest, fmt.Errorf("postData: couldn't unmarshal request body: %v", err))
+		ErrorWriter(w, http.StatusBadRequest, fmt.Errorf("%s %s: couldn't unmarshal request body: %v", r.Method, r.URL.Path, err))
 		return
 	}
 
-	if err := s.dbClient.WriteData(r.Context(), []any{readings}); err != nil {
-		errorWriter(w, http.StatusInternalServerError, fmt.Errorf("postData: couldn't insert data into database: %v", err))
+	if err := s.DBClient.WriteData(r.Context(), []any{readings}); err != nil {
+		ErrorWriter(w, http.StatusInternalServerError, fmt.Errorf("%s %s: couldn't insert data into database: %v", r.Method, r.URL.Path, err))
 		return
 	}
 
@@ -110,10 +92,10 @@ type getDataResp struct {
 }
 
 // Endpoint for the dashboard
-func (s *shared) getData(w http.ResponseWriter, r *http.Request) {
-	queriedData, err := s.dbClient.Query(r.Context(), getDataQuery)
+func (s *Shared) GetData(w http.ResponseWriter, r *http.Request) {
+	queriedData, err := s.DBClient.Query(r.Context(), getDataQuery)
 	if err != nil {
-		errorWriter(w, http.StatusInternalServerError, fmt.Errorf("getData: couldn't query data from database: %v", err))
+		ErrorWriter(w, http.StatusInternalServerError, fmt.Errorf("%s %s: couldn't query data from database: %v", r.Method, r.URL.Path, err))
 		return
 	}
 
@@ -135,10 +117,10 @@ func (s *shared) getData(w http.ResponseWriter, r *http.Request) {
 
 	respInBytes, err := json.Marshal(resp)
 	if err != nil {
-		errorWriter(w, http.StatusInternalServerError, fmt.Errorf("getData: couldn't marshal response: %v", err))
+		ErrorWriter(w, http.StatusInternalServerError, fmt.Errorf("%s %s: couldn't marshal response: %v", r.Method, r.URL.Path, err))
 		return
 	}
 	if _, err := w.Write(respInBytes); err != nil {
-		errorWriter(w, http.StatusInternalServerError, fmt.Errorf("getData: couldn't write response body: %v", err))
+		ErrorWriter(w, http.StatusInternalServerError, fmt.Errorf("%s %s: couldn't write response body: %v", r.Method, r.URL.Path, err))
 	}
 }

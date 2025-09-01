@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"iot-backend/internal/handlers"
+	"iot-backend/internal/middleware"
 	"log"
 	"net/http"
 	"os"
@@ -10,10 +12,6 @@ import (
 	"github.com/InfluxCommunity/influxdb3-go/influxdb3"
 	"github.com/joho/godotenv"
 )
-
-type shared struct {
-	dbClient *influxdb3.Client
-}
 
 func main() {
 	if err := godotenv.Load(); err != nil {
@@ -38,14 +36,13 @@ func main() {
 		}
 	}(client)
 
-	shared := shared{
-		dbClient: client,
+	shared := handlers.Shared{
+		DBClient: client,
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health", shared.healthz)
-	mux.HandleFunc("POST /data", shared.postData)
-	mux.HandleFunc("GET /data", shared.getData)
+	mux.HandleFunc("POST /data", middleware.Logger(middleware.Authenticator(shared.PostData)))
+	mux.HandleFunc("GET /data", middleware.Logger(middleware.Authenticator(shared.GetData)))
 
 	port := os.Getenv("PORT")
 	if port == "" {

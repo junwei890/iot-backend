@@ -1,2 +1,2 @@
-# iot-backend for EE3180
+# iot-backend
 WIP
