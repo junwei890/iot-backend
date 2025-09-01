@@ -33,4 +33,4 @@ jobs:
         run: gcloud builds submit --tag asia-southeast1-docker.pkg.dev/iot-backend-470713/iot-backend/iot-backend:dev .
 
       - name: Deploy to GCP
-        run: gcloud run deploy iot-backend --image asia-southeast1-docker.pkg.dev/iot-backend-470713/iot-backend/iot-backend:dev --region asia-southeast1 --allow-unauthenticated --project iot-backend-470713 --service-account cloud-run-deployer@iot-backend-470713.iam.gserviceaccount.com --set-secrets "DB_NAME=DB_NAME:latest,DB_URL=DB_URL:latest,DB_TOKEN=DB_TOKEN:latest" --max-instances=4
+        run: gcloud run deploy iot-backend --image asia-southeast1-docker.pkg.dev/iot-backend-470713/iot-backend/iot-backend:dev --region asia-southeast1 --allow-unauthenticated --project iot-backend-470713 --service-account cloud-run-deployer@iot-backend-470713.iam.gserviceaccount.com --set-secrets "DB_NAME=DB_NAME:latest,DB_URL=DB_URL:latest,DB_TOKEN=DB_TOKEN:latest,AUTH_TOKEN=AUTH_TOKEN:latest" --max-instances=4
