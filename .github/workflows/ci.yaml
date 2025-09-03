@@ -19,8 +19,9 @@ jobs:
 
       - name: Test code
         env:
+          AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
           DB_TOKEN: ${{ secrets.DB_TOKEN }}
-          TEST_DB_NAME: ${{ secrets.TEST_DB_NAME }}
+          DB_NAME: ${{ secrets.DB_NAME }}
           DB_URL: ${{ secrets.DB_URL }}
         run: go test ./...
 

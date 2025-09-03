@@ -3,6 +3,7 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"iot-backend/internal/handlers"
 	"log"
 	"net/http"
@@ -16,15 +17,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Only testing handlers I can get wrong, logic wise. GetData can be tested with Postman requests
+// Only testing handlers I can get wrong logic wise. GetData can be tested with Postman requests
 func TestPostData(t *testing.T) {
-	if err := godotenv.Load("../.env"); err != nil {
-		log.Printf("couldn't load environment variables from .env file: %v", err)
-	}
-
+	godotenv.Load("../.env")
 	dbToken := os.Getenv("DB_TOKEN")
 	dbURL := os.Getenv("DB_URL")
-	dbName := os.Getenv("TEST_DB_NAME")
+	dbName := os.Getenv("DB_NAME")
 
 	testClient, err := influxdb3.New(influxdb3.ClientConfig{
 		Host:     dbURL,
@@ -34,6 +32,11 @@ func TestPostData(t *testing.T) {
 	if err != nil {
 		t.Errorf("couldn't create client for test database: %v", err)
 	}
+	defer func(client *influxdb3.Client) {
+		if err := client.Close(); err != nil {
+			log.Fatal(fmt.Errorf("couldn't gracefully shutdown test client: %v", err))
+		}
+	}(testClient)
 
 	shared := handlers.Shared{
 		DBClient: testClient,
