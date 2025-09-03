@@ -20,7 +20,7 @@ const errorHeaderKey = "Content-Type"
 const errorHeaderValue = "application/json"
 
 type errorResponse struct {
-	Err error `json:"error"`
+	Err string `json:"error"`
 }
 
 // #nosec G104
@@ -31,8 +31,9 @@ func ErrorWriter(w http.ResponseWriter, code int, error error) {
 	w.Header().Set(errorHeaderKey, errorHeaderValue)
 	w.WriteHeader(code)
 
+	// error is not a json type, needs to be converted to a string
 	resp := errorResponse{
-		Err: error,
+		Err: error.Error(),
 	}
 	respInBytes, _ := json.Marshal(resp)
 	w.Write(respInBytes)
