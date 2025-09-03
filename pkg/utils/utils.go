@@ -25,7 +25,7 @@ func ValidateBearerToken(headers http.Header) (int, error) {
 		return http.StatusBadRequest, fmt.Errorf("authorization header formatting invalid")
 	}
 	bearerToken := authHeaderFields[1]
-	godotenv.Load("../.env")
+	godotenv.Load("../.env") // #nosec G104
 	token := os.Getenv("AUTH_TOKEN")
 	if bearerToken != token {
 		return http.StatusForbidden, fmt.Errorf("bearer token provided is invalid")

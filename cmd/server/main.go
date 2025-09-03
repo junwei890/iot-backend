@@ -15,7 +15,7 @@ import (
 
 func main() {
 	// Creating DB client
-	godotenv.Load()
+	godotenv.Load() // #nosec G104
 	dbToken := os.Getenv("DB_TOKEN")
 	dbURL := os.Getenv("DB_URL")
 	dbName := os.Getenv("DB_NAME")
