@@ -14,10 +14,8 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Printf("couldn't load environment variables from .env file: %v", err)
-	}
-
+	// Creating DB client
+	godotenv.Load()
 	dbToken := os.Getenv("DB_TOKEN")
 	dbURL := os.Getenv("DB_URL")
 	dbName := os.Getenv("DB_NAME")
@@ -40,10 +38,12 @@ func main() {
 		DBClient: client,
 	}
 
+	// Registering endpoints
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /data", middleware.Logger(middleware.Authenticator(shared.PostData)))
 	mux.HandleFunc("GET /data", middleware.Logger(middleware.Authenticator(shared.GetData)))
 
+	// Starting server
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
