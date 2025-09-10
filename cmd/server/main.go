@@ -40,8 +40,8 @@ func main() {
 
 	// Registering endpoints
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /data", middleware.Logger(middleware.Authenticator(shared.PostData)))
-	mux.HandleFunc("GET /data", middleware.Logger(middleware.Authenticator(shared.GetData)))
+	mux.HandleFunc("POST /data", middleware.Logger(shared.PostData))
+	mux.HandleFunc("GET /data", middleware.Logger(shared.GetData))
 
 	// Starting server
 	port := os.Getenv("PORT")
