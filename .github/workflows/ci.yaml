@@ -18,11 +18,6 @@ jobs:
           go-version-file: "go.mod"
 
       - name: Test code
-        env:
-          AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
-          DB_TOKEN: ${{ secrets.DB_TOKEN }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_URL: ${{ secrets.DB_URL }}
         run: go test ./...
 
   style:

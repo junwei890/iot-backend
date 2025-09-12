@@ -16,9 +16,9 @@ import (
 func main() {
 	// Creating DB client
 	godotenv.Load() // #nosec G104
-	dbToken := os.Getenv("DB_TOKEN")
-	dbURL := os.Getenv("DB_URL")
-	dbName := os.Getenv("DB_NAME")
+	var dbToken string = os.Getenv("DB_TOKEN")
+	var dbURL string = os.Getenv("DB_URL")
+	var dbName string = os.Getenv("DB_NAME")
 
 	client, err := influxdb3.New(influxdb3.ClientConfig{
 		Host:     dbURL,
@@ -39,12 +39,12 @@ func main() {
 	}
 
 	// Registering endpoints
-	mux := http.NewServeMux()
+	var mux *http.ServeMux = http.NewServeMux()
 	mux.HandleFunc("POST /data", middleware.Logger(shared.PostData))
 	mux.HandleFunc("GET /data", middleware.Logger(shared.GetData))
 
 	// Starting server
-	port := os.Getenv("PORT")
+	var port string = os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
